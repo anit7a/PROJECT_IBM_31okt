@@ -1,0 +1,21 @@
+id,name,type,category,amount,date
+1,Uang bulanan dari orang tua,income,Uang Bulanan,2000000,2026-10-01
+2,Bayar kos Oktober,expense,Kos dan Tagihan,750000,2026-10-02
+3,Belanja kebutuhan dapur,expense,Makanan dan Minuman,125000,2026-10-03
+4,Beli paket internet,expense,Kos dan Tagihan,65000,2026-10-04
+5,Makan siang di kantin,expense,Makanan dan Minuman,20000,2026-10-05
+6,Transportasi ke kampus,expense,Transportasi,15000,2026-10-06
+7,Honor desain poster,income,Pemasukan Tambahan,350000,2026-10-07
+8,Cetak materi kuliah,expense,Kebutuhan Kuliah,35000,2026-10-08
+9,Makan malam,expense,Makanan dan Minuman,25000,2026-10-09
+10,Beli sabun dan sampo,expense,Lainnya,45000,2026-10-10
+11,Uang beasiswa,income,Beasiswa,500000,2026-10-11
+12,Makan bersama teman,expense,Makanan dan Minuman,55000,2026-10-12
+13,Bensin motor,expense,Transportasi,30000,2026-10-14
+14,Iuran tugas kelompok,expense,Kebutuhan Kuliah,40000,2026-10-16
+15,Nonton film,expense,Hiburan,50000,2026-10-18
+16,Makan siang,expense,Makanan dan Minuman,22000,2026-10-20
+17,Obat dan vitamin,expense,Kesehatan,60000,2026-10-22
+18,Laundry pakaian,expense,Lainnya,35000,2026-10-24
+19,Makan akhir bulan,expense,Makanan dan Minuman,28000,2026-10-27
+20,Isi ulang e-wallet,expense,Transportasi,50000,2026-10-29

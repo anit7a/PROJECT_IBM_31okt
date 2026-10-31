@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KasRantau – Buku Kas Digital Anak Rantau</title>
+
+  <!-- Tailwind CSS via CDN (Presentation Layer – Styling) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js via CDN (Presentation Layer – Visualisasi) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Papa Parse via CDN (Data Layer – CSV Parser) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- Custom Styles (hanya untuk animasi & detail tambahan) -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Tailwind Config: palette hijau-biru konsisten -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50:  '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              900: '#14532d',
+            },
+            accent: {
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen font-sans">
+
+  <!-- ===== HEADER / NAVBAR ===== -->
+  <header class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">💰</span>
+        <div>
+          <h1 class="text-lg font-bold text-brand-700 leading-tight">KasRantau</h1>
+          <p class="text-xs text-gray-400 leading-none">Buku Kas Digital Anak Rantau</p>
+        </div>
+      </div>
+      <div id="header-period" class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full"></div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="max-w-6xl mx-auto px-4 py-6 space-y-8">
+
+    <!-- ===== PRESENTATION LAYER: KPI CARDS ===== -->
+    <section id="kpi-section" aria-label="Ringkasan Keuangan">
+      <h2 class="text-base font-semibold text-gray-500 uppercase tracking-wider mb-3">Ringkasan Keuangan</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Pemasukan -->
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col gap-1 hover:shadow-md transition">
+          <div class="flex items-center gap-2 text-brand-600 mb-1">
+            <span class="text-xl">📈</span>
+            <span class="text-xs font-semibold uppercase tracking-wide">Pemasukan</span>
+          </div>
+          <p id="kpi-income" class="text-2xl font-bold text-brand-600">Rp 0</p>
+          <p id="kpi-income-count" class="text-xs text-gray-400">0 transaksi</p>
+        </div>
+        <!-- Pengeluaran -->
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col gap-1 hover:shadow-md transition">
+          <div class="flex items-center gap-2 text-red-500 mb-1">
+            <span class="text-xl">📉</span>
+            <span class="text-xs font-semibold uppercase tracking-wide">Pengeluaran</span>
+          </div>
+          <p id="kpi-expense" class="text-2xl font-bold text-red-500">Rp 0</p>
+          <p id="kpi-expense-count" class="text-xs text-gray-400">0 transaksi</p>
+        </div>
+        <!-- Sisa Saldo -->
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col gap-1 hover:shadow-md transition">
+          <div class="flex items-center gap-2 text-accent-600 mb-1">
+            <span class="text-xl">💳</span>
+            <span class="text-xs font-semibold uppercase tracking-wide">Sisa Saldo</span>
+          </div>
+          <p id="kpi-balance" class="text-2xl font-bold text-accent-600">Rp 0</p>
+          <p id="kpi-balance-label" class="text-xs text-gray-400">per filter aktif</p>
+        </div>
+        <!-- Total Transaksi -->
+        <div class="kpi-card bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col gap-1 hover:shadow-md transition">
+          <div class="flex items-center gap-2 text-purple-500 mb-1">
+            <span class="text-xl">🗒️</span>
+            <span class="text-xs font-semibold uppercase tracking-wide">Total Transaksi</span>
+          </div>
+          <p id="kpi-total" class="text-2xl font-bold text-purple-500">0</p>
+          <p class="text-xs text-gray-400">catatan tercatat</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PRESENTATION LAYER: CHARTS ===== -->
+    <section aria-label="Visualisasi Keuangan">
+      <h2 class="text-base font-semibold text-gray-500 uppercase tracking-wider mb-3">Visualisasi</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Doughnut Chart -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 class="text-sm font-semibold text-gray-600 mb-4">🍩 Pengeluaran per Kategori</h3>
+          <div class="relative h-64">
+            <canvas id="chart-doughnut"></canvas>
+          </div>
+        </div>
+        <!-- Bar Chart -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 class="text-sm font-semibold text-gray-600 mb-4">📊 Pemasukan vs Pengeluaran Bulanan</h3>
+          <div class="relative h-64">
+            <canvas id="chart-bar"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PRESENTATION LAYER: FORM TAMBAH TRANSAKSI ===== -->
+    <section aria-label="Tambah Transaksi">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">➕ Tambah Transaksi</h2>
+        <form id="form-transaction" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" novalidate>
+          <!-- Nama Transaksi -->
+          <div class="flex flex-col gap-1 lg:col-span-2">
+            <label for="f-name" class="text-xs font-medium text-gray-500">Nama Transaksi <span class="text-red-400">*</span></label>
+            <input id="f-name" type="text" placeholder="cth. Bayar kos, Uang bulanan..." required
+              class="form-input border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 transition" />
+          </div>
+          <!-- Nominal -->
+          <div class="flex flex-col gap-1">
+            <label for="f-amount" class="text-xs font-medium text-gray-500">Nominal (Rp) <span class="text-red-400">*</span></label>
+            <input id="f-amount" type="number" min="1" placeholder="cth. 150000" required
+              class="form-input border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 transition" />
+          </div>
+          <!-- Kategori -->
+          <div class="flex flex-col gap-1">
+            <label for="f-category" class="text-xs font-medium text-gray-500">Kategori <span class="text-red-400">*</span></label>
+            <select id="f-category" required
+              class="form-input border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 transition bg-white">
+              <option value="">-- Pilih Kategori --</option>
+              <option>Makanan dan Minuman</option>
+              <option>Transportasi</option>
+              <option>Kos dan Tagihan</option>
+              <option>Kebutuhan Kuliah</option>
+              <option>Hiburan</option>
+              <option>Kesehatan</option>
+              <option>Uang Bulanan</option>
+              <option>Pemasukan Tambahan</option>
+              <option>Beasiswa</option>
+              <option>Lainnya</option>
+            </select>
+          </div>
+          <!-- Tanggal -->
+          <div class="flex flex-col gap-1">
+            <label for="f-date" class="text-xs font-medium text-gray-500">Tanggal <span class="text-red-400">*</span></label>
+            <input id="f-date" type="date" required
+              class="form-input border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 transition" />
+          </div>
+          <!-- Jenis -->
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-gray-500">Jenis Transaksi <span class="text-red-400">*</span></label>
+            <div class="flex gap-3 mt-1">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="f-type" value="income" class="accent-brand-500" />
+                <span class="text-sm text-brand-600 font-medium">📈 Pemasukan</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="f-type" value="expense" class="accent-red-500" />
+                <span class="text-sm text-red-500 font-medium">📉 Pengeluaran</span>
+              </label>
+            </div>
+          </div>
+          <!-- Error Message -->
+          <p id="form-error" class="text-xs text-red-500 col-span-full hidden"></p>
+          <!-- Submit Button -->
+          <div class="col-span-full">
+            <button type="submit"
+              class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-semibold px-6 py-2.5 rounded-xl transition text-sm shadow-sm">
+              Simpan Transaksi
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== PRESENTATION LAYER: FILTER & DAFTAR TRANSAKSI ===== -->
+    <section aria-label="Daftar Transaksi">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 class="text-base font-semibold text-gray-700">📋 Daftar Transaksi</h2>
+          <!-- Search Bar -->
+          <input id="search-input" type="search" placeholder="🔍 Cari nama transaksi..."
+            class="border border-gray-200 rounded-xl px-3 py-2 text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-brand-400 transition" />
+        </div>
+
+        <!-- Filter Row -->
+        <div class="flex flex-wrap gap-2 mb-5">
+          <!-- Filter Jenis -->
+          <select id="filter-type"
+            class="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white transition">
+            <option value="">Semua Jenis</option>
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+          </select>
+          <!-- Filter Kategori -->
+          <select id="filter-category"
+            class="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white transition">
+            <option value="">Semua Kategori</option>
+            <option>Makanan dan Minuman</option>
+            <option>Transportasi</option>
+            <option>Kos dan Tagihan</option>
+            <option>Kebutuhan Kuliah</option>
+            <option>Hiburan</option>
+            <option>Kesehatan</option>
+            <option>Uang Bulanan</option>
+            <option>Pemasukan Tambahan</option>
+            <option>Beasiswa</option>
+            <option>Lainnya</option>
+          </select>
+          <!-- Filter Bulan -->
+          <select id="filter-month"
+            class="border border-gray-200 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white transition">
+            <option value="">Semua Bulan</option>
+          </select>
+          <!-- Reset Filter -->
+          <button id="btn-reset-filter"
+            class="text-xs text-gray-400 hover:text-red-500 border border-gray-200 rounded-xl px-3 py-1.5 transition">
+            ✕ Reset
+          </button>
+        </div>
+
+        <!-- Transaction List -->
+        <div id="transaction-list" class="space-y-2 min-h-[120px]">
+          <!-- Diisi oleh JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12">
+          <p class="text-4xl mb-2">📭</p>
+          <p class="text-gray-400 text-sm">Belum ada transaksi yang sesuai filter.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs text-gray-400 border-t border-gray-100 mt-4">
+    KasRantau &copy; 2026 · Data tersimpan di localStorage · Tidak ada data yang dikirim ke server
+  </footer>
+
+  <!-- Application Logic (script.js dimuat setelah DOM) -->
+  <script src="script.js"></script>
+</body>
+</html>
